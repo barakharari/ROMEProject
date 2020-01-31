@@ -1,0 +1,19 @@
+rand.py is the file which essentially does whack a mole with blocks popping up on the screen
+
+opto2560.py is the optokinetic tape test scaled for this display
+
+optoTest.py is me testing making the red regions bigger to possibly aide in camera inaccuracy but will not track block location properly
+
+
+run via:
+
+right click in the folder and select "git BASH here"
+
+in the terminal window type:
+"python rand.py"
+"python opto2560.py"
+
+
+the output files will generate in the folder
+
+to use the camera, run the tobii software and then open project iris on the desktop and run it to control cursor
