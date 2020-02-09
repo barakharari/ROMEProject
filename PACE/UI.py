@@ -15,9 +15,13 @@ WHITE = (255, 255, 255)
 SCREENWIDTH = int(tk.Tk().winfo_screenwidth() / 2)
 SCREENHEIGHT = int(tk.Tk().winfo_screenheight() / 2)
 
+mainMenu = True
+
 def createButton(screen, text, buttonColor, fontColor, positionRect, fontSize):
-    font = pygame.font.SysFont("Times New Roman, Arial", fontSize)
+
     pygame.draw.rect(screen, buttonColor, positionRect)
+
+    font = pygame.font.SysFont("Times New Roman, Arial", fontSize)
     textSurface = font.render(text, True, fontColor)
     textRect = textSurface.get_rect()
     textRect.center = (positionRect[0] + positionRect[2]/2), (positionRect[1] + positionRect[3]/2)

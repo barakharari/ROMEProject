@@ -4,14 +4,18 @@ import os
 from matplotlib import pyplot as plt
 
 class Graph:
-    
-    def __init__(self, eyePos, blockPos, time):
+
+    def __init__(self, name, eyePos, blockPos, times):
         self.eyePos = eyePos
         self.blockPos = blockPos
-        self.time = time
+        self.times = times
+        self.name = name
 
     def initializeGraph(self):
-        for x in range(0,len(self.eyePos)):
-            plt.plot(self.blockPos[x][0], self.time[x])
-            plt.plot(self.eyePos[x][0], self.time[x])
+        plt.xlabel("Time")
+        plt.ylabel("Distance")
+        plt.title(f"{self.name}")
+        plt.plot(self.times, self.blockPos, color="b", label="Block Position")
+        plt.plot(self.times, self.eyePos, color="k", linestyle="--", label="Eye Position")
+        plt.legend()
         plt.show()

@@ -11,102 +11,229 @@ class rectObj:
 	xCoord = 0
 	color = ()
 
-class RandTest:
+class Test:
 
-	blockPos = []
-	eyePos = []
-	time = []
+	testDone = None
+	currentTest = ""
 
 	def updateScreen(self):
 		self.screen.fill(pygame.Color("white"))
 		#BACK BUTTON
 		UI.createButton(self.screen, "BACK", UI.BRIGHT_GREEN, UI.BLACK, (50,50,75,75), 20)
 
-	def __init__(self, screen, numRuns, width, height):
+	def __init__(self, screen, numRuns, numBlocks, speed, testName):
 		self.screen = screen
 		self.numRuns = numRuns
-		self.width = width
-		self.height = height
+		self.numBlocks = numBlocks
+		self.speed = speed
+		self.testName = testName
+		self.blockPos = []
+		self.eyePos = []
+		self.times = []
+		self.width = UI.SCREENWIDTH
+		self.height = UI.SCREENHEIGHT
+
+	def countdown(self):
+		for i in range(0, 3):
+			UI.createText(self.screen, "Starting test in:", UI.BLACK, (UI.SCREENWIDTH / 2, UI.SCREENHEIGHT / 6), int(UI.SCREENWIDTH / 14))
+			UI.createText(self.screen, f"{3-i}", UI.BLACK, (UI.SCREENWIDTH / 2, UI.SCREENHEIGHT / 2), int(UI.SCREENWIDTH / 16))
+			pygame.display.update()
+			time.sleep(1)
+			self.screen.fill(pygame.Color("white"))
 
 	def runTest(self):
+		self.countdown()
+		if self.testName == "Opto Test":
+			self.optoTest()
+		elif self.testName == "Random Test":
+			self.randTest()
+		elif self.testName == "Saccades Test":
+			self.saccadesTest()
+		elif self.testName == "Smooth Test":
+			self.smoothTest()
 
-		blockPos = []
-		eyePos = []
-		times = []
+	def saccadesTest(self):
+
+		self.blockPos = []
+		self.eyePos = []
+		self.times = []
+
+		left = (self.width / 4) - 50
+		right = (3 * self.width / 4) - 50
+		y = (self.height / 2) - 50
+
+		Test.testDone = False
+		Test.currentTest = self.testName
+
+		currentTime = 0
 
 		for i in range(0, self.numRuns):
+
+			if UI.mainMenu:
+				return
+
+			self.updateScreen()
+
+			if i % 2 == 0:
+				pygame.draw.rect(self.screen, pygame.Color("red"), (left, y, 100, 100))
+				self.blockPos.append(left)
+			else:
+				pygame.draw.rect(self.screen, pygame.Color("red"), (right, y, 100, 100))
+				self.blockPos.append(right)
+
+
+			pygame.display.update()
+			time.sleep(self.speed)
+
+			mouseX, mouseY = pygame.mouse.get_pos()
+			self.eyePos.append(mouseX)
+			self.times.append(currentTime)
+
+			currentTime += 1
+
+		Test.testDone = True
+
+	def randTest(self):
+
+		self.blockPos = []
+		self.eyePos = []
+		self.times = []
+
+		Test.testDone = False
+		Test.currentTest = self.testName
+
+		currentTime = 0
+
+		for i in range(0, self.numRuns):
+
+			if UI.mainMenu:
+				return
+
 			x = random.randint(100, self.width - 100)
 			y = random.randint(100, self.height - 100)
+
 			self.updateScreen()
+
 			pygame.draw.rect(self.screen, pygame.Color("red"), (x, y, 100, 100))
-			time.sleep(0.5)
+
 			pygame.display.update()
+			time.sleep(self.speed)
+
 			mouseX, mouseY = pygame.mouse.get_pos()
-			blockPos.append([x,y])
-			eyePos.append([mouseX,mouseY])
-			times.append(time.perf_counter_ns())
+			self.blockPos.append(x)
+			self.eyePos.append(mouseX)
+			self.times.append(currentTime)
 
-		graph = gp.Graph(blockPos, eyePos, times)
-		graph.initializeGraph()
-		#pygame.quit()
+			currentTime += 1
 
-class OptoTest:
+		Test.testDone = True
 
-	blockPos = []
-	eyePos = []
-	time = []
+	def smoothTest(self):
 
-	def __init__(self, screen, numBlocks, numRuns, speed, width, height):
-		self.screen = screen
-		self.numBlocks = numBlocks
-		self.numRuns = numRuns
-		self.speed = speed
-		self.width = width
-		self.height = height
 
-	def runTest(self):
+		self.blockPos = []
+		self.eyePos = []
+		self.times = []
 
-		blockPos = []
-		eyePos = []
-		time = []
+		#Starting position of rectangle
+		rect_x = UI.SCREENWIDTH / 2
+		rect_y = UI.SCREENHEIGHT / 2
+
+		#Speed/direction of rectangle
+		rect_change_x = -3
+		rect_change_y = 3
+
+		Test.testDone = False
+		Test.currentTest = self.testName
+
+		currentTime = 0
+
+		for i in range(0, self.numRuns):
+
+			if UI.mainMenu:
+				return
+
+			rect_x += rect_change_x #Changes rectangle x to move in x direction
+			rect_y += rect_change_y #Changes rectangle y to move in y direction
+
+			self.updateScreen()
+			pygame.draw.rect(self.screen, UI.RED, [rect_x, rect_y, 100,100])
+
+
+			#Bounce ball if needed
+			if rect_y > UI.SCREENHEIGHT - 100 or rect_y < 0: #If y position reaches the border
+				rect_change_y = rect_change_y * -1 #Makes rectangle move in opposite y direction
+			if rect_x > UI.SCREENWIDTH - 100 or rect_x < 0: #If x position reaches the border
+				rect_change_x = rect_change_x * -1 #Makes rectangle move in opposite x direction
+			self.blockPos.append(rect_x)
+			mouseX, mouseY = pygame.mouse.get_pos()
+			self.eyePos.append(mouseX)
+			self.times.append(currentTime)
+
+			currentTime += 1
+
+			pygame.display.update()
+
+		Test.testDone = True
+
+	def optoTest(self):
+
+		self.blockPos = []
+		self.eyePos = []
+		self.times = []
 
 		blockList = []
 
+		self.updateScreen()
+		pygame.display.update()
+
+		#Create all the blocks being iterated through
 		for x in range(self.numBlocks):
 			tempBlock = rectObj()
 			tempBlock.xCoord = (x / self.numBlocks) * self.width
 			if x % 4 == 0:
-				tempBlock.color = RED
+				tempBlock.color = UI.RED
 			else:
-				tempBlock.color = BLACK
+				tempBlock.color = UI.BLACK
 			blockList.append(tempBlock)
-		#create surface to create green rectangle
-		surf = pygame.Surface((400,150))
-		surf.fill(WHITE)
-		greenRect = pygame.draw.rect(surf, GREEN, (0, 0, 400, 150), 7)
-		greenRectLeft =  (self.width / 2) - (greenRect.width / 2)
-		greenRectRight = self.width - greenRectLeft
+
+		#Create surface to create green rectangle
+		surf = pygame.Surface((self.width / 4, self.height / 4))
+		surf.fill(UI.WHITE)
+		greenRect = pygame.draw.rect(surf, UI.GREEN, (0, 0, self.width / 4, self.height / 4), 7)
+		greenRectLeft =  greenRect.left
+		greenRectRight = greenRect.left + greenRect.width
 		#place at this pixel location
-		screen.blit(surf, (self.width / 2 - (greenRect.width / 2), self.height / 2 - (greenRect.height / 2)))
+		self.screen.blit(surf, (3 * self.width / 8, 3 * self.height / 8))
+		pygame.display.update()
 
 		BLOCKHEIGHT = self.width / self.numBlocks
 		CENTERY = (self.height/2) - (BLOCKHEIGHT / 2)
 
+		Test.testDone = False
+		Test.currentTest = self.testName
+
+		currentTime = 0
+
 		for x in range(self.numRuns):
+
+			if UI.mainMenu:
+				return
+
 			for block in blockList:
-				pygame.draw.rect(screen, block.color, (block.xCoord, CENTERY, BLOCKHEIGHT, BLOCKHEIGHT))
+				pygame.draw.rect(self.screen, block.color, (block.xCoord, CENTERY, BLOCKHEIGHT, BLOCKHEIGHT))
 				block.xCoord += self.speed
 				if block.xCoord >= self.width - BLOCKHEIGHT:
 					block.xCoord = -BLOCKHEIGHT
-				if block.xCoord > greenRectLeft and block.xCoord < greenRectRight and block.color == RED:
-					blockPos.append(block.xCoord)
+				if block.xCoord > greenRectLeft and block.xCoord < greenRectRight and block.color == UI.RED:
+					self.blockPos.append(block.xCoord)
 					mouseX, mouseY = pygame.mouse.get_pos()
-					eyePos.append([mouseX,mouseY])
+					self.eyePos.append(mouseX)
+					self.times.append(currentTime)
 
 			pygame.display.update()
-			time.sleep(.002)
+			time.sleep(.005)
 
-		for pos in eyePos:
-			print("Eye pos: %d", pos[0])
-		for pos in blockPos:
-			print("Block pos: %d", pos[0])
+			currentTime += 1
+
+		Test.testDone = True
