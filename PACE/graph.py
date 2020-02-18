@@ -19,3 +19,6 @@ class Graph:
         plt.plot(self.times, self.eyePos, color="k", linestyle="--", label="Eye Position")
         plt.legend()
         plt.show()
+
+    def convDivGraph(self):
+        print("hello")

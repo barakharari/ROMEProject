@@ -14,6 +14,7 @@ BRIGHT_RED = (255,0,0)
 WHITE = (255, 255, 255)
 SCREENWIDTH = int(tk.Tk().winfo_screenwidth() / 2)
 SCREENHEIGHT = int(tk.Tk().winfo_screenheight() / 2)
+BACKBUTTONRECT = pygame.Rect(50,50,75,75)
 
 mainMenu = True
 
