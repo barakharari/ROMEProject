@@ -6,7 +6,8 @@ from pygame.locals import *
 import random
 import graph as gp
 import UI
-from serial import Serial as ser
+#import serial
+#from serial import Serial as ser
 
 
 class rectObj:

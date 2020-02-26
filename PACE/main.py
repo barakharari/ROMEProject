@@ -11,7 +11,7 @@ import option as opt
 import UI
 import graph as gp
 import statistics
-import pickle
+import json
 
 pygame.init()
 
@@ -76,7 +76,27 @@ def ageAndNameMenu():
 		pygame.display.update()
 		clock.tick(30)
 
-def gatherData(age, test):
+def getData(fileName):
+	with open("stats.json", 'r') as f:
+		data = json.load(f)
+		f.close()
+		return data
+
+#Data is a python dictionary
+def postData(fileName, data):
+	with open(fileName, 'w') as f:
+		data = json.dumps(data)
+		f.write(data)
+		f.close()
+
+# def clearData(fileName):
+# 	with open(fileName, 'w') as f:
+# 		data = json.load(f)
+# 		for key in data:
+# 			for key2 in data[key]:
+# 				print(data[key][key2])
+
+def stats(age, test):
 
 	for i in range(0, len(options)):
 		if (options[i].name == test):
@@ -85,44 +105,44 @@ def gatherData(age, test):
 			blockPos = options[i].test.blockPos
 			times = options[i].test.times
 
-			#average distance from blockPos
+			fileName = "stats.json"
+
+			# Calculate mean distance within current test
 			eyePosDistances = []
 			for x in range(0,len(times)):
 				eyePosDistances.append(abs(blockPos[i] - eyePos[i]))
-
-			#mean of eyePos distances
 			eyePosDistanceAverage = statistics.mean(eyePosDistances)
 
-			info = None
-			ageObject = None
+			#age = int(age)
+			#CHANGE THIS
+			age = 21
 
-			#with open('userData.data', 'rb') as handle:
-    		#	info = pickle.load(handle)
+			info = getData(fileName)
 
-			#if 18 <= age <= 30:
-			#	testArray = info["18-30"][f"{test}"]
-			#	testArray.append(eyePosDistanceAverage)
-			#	info["18-30"][f"{test}Average"] = statistics.mean(testArray)
-			#elif 31 <= age <= 60:
-			#	testArray = info["31-60"][f"{test}"]
-			#	testArray.append(eyePosDistanceAverage)
-			#	info["31-60"][f"{test}Average"] = statistics.mean(testArray)
-			#elif 61 <= age <= 80:
-			#	testArray = info["61-80"][f"{test}"]
-			#	testArray.append(eyePosDistanceAverage)
-			#	info["61-80"][f"{test}Average"] = statistics.mean(testArray)
-
-			#with open('userData.data', 'wb') as handle:
-    		#	pickle.dump(info, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-			#create graph
-
-			#convdiv test
-			if len(eyePos) == 0:
-				graph = gp.convDivGraph()
+			if 7 <= age <= 22:
+				info['7-21'][f'{test}'].append(eyePosDistanceAverage)
+				info['7-21'][f'{test} Average'] = statistics.mean(info['7-21'][f'{test}'])
+				if len(info['7-21'][f'{test}']) > 1:
+					info['7-21'][f'{test} SD'] = statistics.stdev(info['7-21'][f'{test}'])
+			elif 23 <= age <= 40:
+				info['23-40'][f'{test}'].append(eyePosDistanceAverage)
+				info['23-40'][f'{test} Average'] = statistics.mean(info['23-40'][f'{test}'])
+				if len(info['23-40'][f'{test}']) > 1:
+					info['23-40'][f'{test} SD'] = statistics.stdev(info['23-40'][f'{test}'])
+			elif 41 <= age <= 65:
+				info['41-65'][f'{test}'].append(eyePosDistanceAverage)
+				info['41-65'][f'{test} Average'] = statistics.mean(info['41-65'][f'{test}'])
+				if len(info['41-65'][f'{test}']) > 1:
+					info['41-65'][f'{test} SD'] = statistics.stdev(info['41-65'][f'{test}'])
 			else:
-				graph = gp.Graph(options[i].name, eyePos, blockPos, times)
-			graph.initializeGraph()
+				info['65+'][f'{test}'].append(eyePosDistanceAverage)
+				info['65+'][f'{test} Average'] = statistics.mean(info['65+'][f'{test}'])
+				if len(info['65+'][f'{test}']) > 1:
+					info['65+'][f'{test} SD'] = statistics.stdev(info['65+'][f'{test}'])
+
+			postData(fileName, info)
+
+			#clearData(fileName)
 
 			break
 
@@ -143,7 +163,7 @@ def initializeTests():
 		elif tests[i] == "Random Test":
 			test = t.Test(screen, 11, None, 1, "Random Test")
 		elif tests[i] == "Saccades Test":
-			test = t.Test(screen, 11, None, 1, "Saccades Test")
+			test = t.Test(screen, 4, None, 0.25, "Saccades Test")
 		elif tests[i] == "Smooth Test":
 			test = t.Test(screen, 200, None, None, "Smooth Test")
 		else:
@@ -201,7 +221,12 @@ if __name__ == "__main__":
 			if t.Test.testDone:
 				t.Test.testDone = False
 
-				gatherData(age, t.Test.currentTest)
+				stats(age, t.Test.currentTest)
+				#if len(eyePos) == 0:
+				#	graph = gp.convDivGraph()
+				#else:
+				#	graph = gp.Graph(options[i].name, eyePos, blockPos, times)
+				#graph.initializeGraph()
 
 			#PRESSED BACK BUTON
 			if UI.BACKBUTTONRECT.collidepoint(pygame.mouse.get_pos()):
